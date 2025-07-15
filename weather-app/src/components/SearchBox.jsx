@@ -5,14 +5,7 @@ import "./SearchBox.css"
 
 const SearchBox = ({ onSearch, isLoading = false, currentLocation }) => {
   const [query, setQuery] = useState("")
-  const [suggestions] = useState([
-    "New York, NY",
-    "Los Angeles, CA",
-    "Chicago, IL",
-    "Houston, TX",
-    "Phoenix, AZ",
-    "Philadelphia, PA",
-  ])
+  // Removed the 'suggestions' state
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -22,10 +15,7 @@ const SearchBox = ({ onSearch, isLoading = false, currentLocation }) => {
     }
   }
 
-  const handleSuggestionClick = (city) => {
-    onSearch(city)
-    setQuery("")
-  }
+  // Removed the 'handleSuggestionClick' function
 
   return (
     <div className="search-box">
@@ -57,18 +47,7 @@ const SearchBox = ({ onSearch, isLoading = false, currentLocation }) => {
           </button>
         </form>
 
-        <div className="suggestions-grid">
-          {suggestions.map((city) => (
-            <button
-              key={city}
-              onClick={() => handleSuggestionClick(city)}
-              className="suggestion-button"
-              disabled={isLoading}
-            >
-              {city}
-            </button>
-          ))}
-        </div>
+        {/* Removed the suggestions-grid div entirely */}
       </div>
     </div>
   )

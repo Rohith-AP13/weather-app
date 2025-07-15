@@ -1,14 +1,112 @@
 
-const API_KEY = process.env.REACT_APP_OPENWEATHER_API_KEY || "your-api-key-here"
+const API_KEY = process.env.REACT_APP_OPENWEATHER_API_KEY
+
+// Helper: demo data when no API key is present (so the preview still works)
+const demoWeather = {
+  location: { name: "Demo City", country: "XX", lat: 0, lon: 0 },
+  current: {
+    temperature: 72,
+    feelsLike: 74,
+    condition: "Clear",
+    description: "clear sky",
+    icon: "01d",
+    humidity: 50,
+    windSpeed: 5,
+    pressure: 1015,
+    visibility: 10,
+  },
+}
+const demoForecast = [
+  {
+    date: "2025-07-16",
+    day: "Wednesday",
+    high: 75,
+    low: 60,
+    condition: "Clear",
+    description: "clear sky",
+    icon: "01d",
+    humidity: 55,
+    windSpeed: 6,
+    precipitation: 0,
+  },
+  {
+    date: "2025-07-17",
+    day: "Thursday",
+    high: 78,
+    low: 62,
+    condition: "Clouds",
+    description: "few clouds",
+    icon: "02d",
+    humidity: 60,
+    windSpeed: 7,
+    precipitation: 10,
+  },
+  {
+    date: "2025-07-18",
+    day: "Friday",
+    high: 80,
+    low: 65,
+    condition: "Rain",
+    description: "light rain",
+    icon: "10d",
+    humidity: 70,
+    windSpeed: 8,
+    precipitation: 50,
+  },
+  {
+    date: "2025-07-19",
+    day: "Saturday",
+    high: 70,
+    low: 58,
+    condition: "Clear",
+    description: "clear sky",
+    icon: "01d",
+    humidity: 50,
+    windSpeed: 5,
+    precipitation: 0,
+  },
+  {
+    date: "2025-07-20",
+    day: "Sunday",
+    high: 73,
+    low: 60,
+    condition: "Clouds",
+    description: "overcast clouds",
+    icon: "04d",
+    humidity: 65,
+    windSpeed: 7,
+    precipitation: 20,
+  },
+]
+const demoHourlyForecast = [
+  { time: "1 PM", temperature: 72, condition: "Clear", icon: "01d", precipitation: 0 },
+  { time: "2 PM", temperature: 73, condition: "Clear", icon: "01d", precipitation: 0 },
+  { time: "3 PM", temperature: 74, condition: "Clouds", icon: "02d", precipitation: 0 },
+  { time: "4 PM", temperature: 73, condition: "Clouds", icon: "02d", precipitation: 0 },
+  { time: "5 PM", temperature: 72, condition: "Clouds", icon: "03d", precipitation: 10 },
+  { time: "6 PM", temperature: 70, condition: "Rain", icon: "10d", precipitation: 30 },
+  { time: "7 PM", temperature: 68, condition: "Rain", icon: "10n", precipitation: 50 },
+  { time: "8 PM", temperature: 66, condition: "Clear", icon: "01n", precipitation: 0 },
+]
+
 const BASE_URL = "https://api.openweathermap.org/data/2.5"
 
 export class WeatherAPI {
   static async getCurrentWeather(city) {
     try {
+      if (!API_KEY) {
+        console.warn("⚠️  REACT_APP_OPENWEATHER_API_KEY is missing – using mock data.")
+        return demoWeather
+      }
       const response = await fetch(`${BASE_URL}/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=imperial`)
 
       if (!response.ok) {
-        throw new Error(`Weather data not found for ${city}`)
+        const { message } = await response.json().catch(() => ({}))
+        /* OpenWeatherMap returns:
+           401 – bad / missing key
+           404 – city not found
+        */
+        throw new Error(`OpenWeather error ${response.status}: ${message || "Unable to fetch data"}`)
       }
 
       const data = await response.json()
@@ -39,11 +137,13 @@ export class WeatherAPI {
   }
 
   static async getForecast(city) {
+    if (!API_KEY) return demoForecast
     try {
       const response = await fetch(`${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=imperial`)
 
       if (!response.ok) {
-        throw new Error(`Forecast data not found for ${city}`)
+        const { message } = await response.json().catch(() => ({}))
+        throw new Error(`OpenWeather error ${response.status}: ${message || "Unable to fetch data"}`)
       }
 
       const data = await response.json()
@@ -90,11 +190,13 @@ export class WeatherAPI {
   }
 
   static async getHourlyForecast(city) {
+    if (!API_KEY) return demoHourlyForecast
     try {
       const response = await fetch(`${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=imperial`)
 
       if (!response.ok) {
-        throw new Error(`Hourly forecast not found for ${city}`)
+        const { message } = await response.json().catch(() => ({}))
+        throw new Error(`OpenWeather error ${response.status}: ${message || "Unable to fetch data"}`)
       }
 
       const data = await response.json()
